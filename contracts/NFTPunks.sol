@@ -7,8 +7,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
 import "./Base64.sol";
+import "./NFTPunksADN.sol";
 
-contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter {
+contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksADN {
     using Counters for Counters.Counter;
 
     Counters.Counter private _idCounter;

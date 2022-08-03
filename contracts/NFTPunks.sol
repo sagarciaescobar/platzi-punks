@@ -20,7 +20,7 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
         uint256 _maxSupply,
         address[] memory payees,
         uint256[] memory shares_
-    ) ERC721("NFTPunk", "NP") PaymentSplitter(payees, shares_) {
+    ) ERC721("NFTPunk", "NP") PaymentSplitter(payees, shares_) payable {
         maxSupply = _maxSupply;
     }
 
@@ -62,19 +62,21 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
                     "&facialHairColor=",
                     getFacialHairColor(_dna),
                     "&facialHairType=",
-                    getFacialHairType(_dna),
-                    "&hairColor=",
+                    getFacialHairType(_dna)
+                )
+            );
+        return string(abi.encodePacked(params,"&hairColor=",
                     getHairColor(_dna),
                     "&hatColor=",
                     getHatColor(_dna),
                     "&graphicType=",
                     getGraphicType(_dna),
                     "&mouthType=",
-                    getMouthType(_dna)
-                )
-            );
-        return string(abi.encodePacked(params,"&skinColor=",
-                    getSkinColor(_dna),"&topType=", getTopType(_dna)));
+                    getMouthType(_dna),
+                    "&skinColor=",
+                    getSkinColor(_dna),
+                    "&topType=", 
+                    getTopType(_dna)));
     }
 
     
@@ -89,7 +91,7 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
       require(msg.value >= 5 * (10**16),"you neet 0.05 ETH to mint the PinaPunks");
         uint256 current = _idCounter.current();
         tokenDNA[current] = deterministicPseudoRandomDNA(current, msg.sender);
-        require(current <= maxSupply, "No NTFPunks left");
+        require(current < maxSupply, "No NTFPunks left");
         _safeMint(msg.sender, current);
         _idCounter.increment();
     }

@@ -5,7 +5,12 @@ describe("NFTPunks Contract", () => {
   const setup = async ({ maxSupply = 10000 }) => {
     const [owner,second] = await ethers.getSigners();
     const NFTPunks = await ethers.getContractFactory("NFTPunks");
-    const deployed = await NFTPunks.deploy(maxSupply, [second.address], [20]);
+    console.log(NFTPunks.signer.address);
+    console.log(await NFTPunks.signer.getBalance() / 10**18);
+    console.log(owner.address);
+    console.log(second.address);
+    const address = await second.getAddress();
+    const deployed = await NFTPunks.deploy(maxSupply,[address],[1]);
 
     return {
       owner,

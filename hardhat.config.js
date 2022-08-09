@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require('hardhat-contract-sizer');
 require("dotenv").config();
 
 const projectId = process.env.INFURA_PROJECT_ID
@@ -26,5 +27,11 @@ module.exports = {
         '0xa7853ae1e7e3916e66196a6012065958b010aa40dffb03cb1f545c0cc4ed2d30'
       ]
     }
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: false,
+    strict: false,
   }
 };

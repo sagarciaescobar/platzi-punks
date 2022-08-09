@@ -20,7 +20,7 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
         uint256 _maxSupply,
         address[] memory payees,
         uint256[] memory shares_
-    ) ERC721("NFTPunk", "NP") PaymentSplitter(payees, shares_) payable {
+    ) payable ERC721("NFTPunk", "NP") PaymentSplitter(payees, shares_) {
         maxSupply = _maxSupply;
     }
 
@@ -41,31 +41,34 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
         return super.supportsInterface(interfaceId);
     }
 
-    function _baseURI() internal pure override returns(string memory) {
+    function _baseURI() internal pure override returns (string memory) {
         return "https://avataaars.io/";
     }
 
-    function _paramsURI(uint256 _dna) internal view returns(string memory){
-        string memory params;
-        params = string(
+    function _paramsURI(uint256 _dna) internal view returns (string memory) {
+        string memory params = string(
+            abi.encodePacked(
+                "accessoriesType=",
+                getAccessoriesType(_dna),
+                "&clotheColor=",
+                getClotheColor(_dna),
+                "&clotheType=",
+                getClotheType(_dna),
+                "&eyeType=",
+                getEyeType(_dna),
+                "&eyebrowType=",
+                getEyeBrowType(_dna)
+            )
+        );
+        return
+            string(
                 abi.encodePacked(
-                    "accessoriesType=",
-                    getAccessoriesType(_dna),
-                    "&clotheColor=",
-                    getClotheColor(_dna),
-                    "&clotheType=",
-                    getClotheType(_dna),
-                    "&eyeType=",
-                    getEyeType(_dna),
-                    "&eyebrowType=",
-                    getEyeBrowType(_dna),
+                    params,
                     "&facialHairColor=",
                     getFacialHairColor(_dna),
                     "&facialHairType=",
-                    getFacialHairType(_dna)
-                )
-            );
-        return string(abi.encodePacked(params,"&hairColor=",
+                    getFacialHairType(_dna),
+                    "&hairColor=",
                     getHairColor(_dna),
                     "&hatColor=",
                     getHatColor(_dna),
@@ -75,20 +78,18 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
                     getMouthType(_dna),
                     "&skinColor=",
                     getSkinColor(_dna),
-                    "&topType=", 
-                    getTopType(_dna)));
+                    "&topType=",
+                    getTopType(_dna)
+                )
+            );
     }
 
-    
     function imageByDNA(uint256 _dna) public view returns (string memory) {
-        string memory baseURI = _baseURI();
-        string memory paramsURI = _paramsURI(_dna);
-
-        return string(abi.encodePacked(baseURI, "?", paramsURI));
+        return string(abi.encodePacked(_baseURI(), "?", _paramsURI(_dna)));
     }
 
     function mint() public payable {
-      require(msg.value >= 5 * (10**16),"you neet 0.05 ETH to mint the PinaPunks");
+        require(msg.value >= 5 * (10**16), "you need 0.05 ETH to mint");
         uint256 current = _idCounter.current();
         tokenDNA[current] = deterministicPseudoRandomDNA(current, msg.sender);
         require(current < maxSupply, "No NTFPunks left");
@@ -96,21 +97,22 @@ contract NFTPunks is ERC721, ERC721Enumerable, PaymentSplitter, NFTPunksDNA {
         _idCounter.increment();
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory){
-        require(_exists(tokenId),"ERC721 Metadata: URI query for nonexistent token");
-
-        uint256 dna = tokenDNA[tokenId];
-        string memory image = imageByDNA(dna);
-
-        string memory jsonURI = Base64.encode(
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        require(_exists(tokenId), "URI query for nonexistent token");
+        string memory json = Base64.encode(
             abi.encodePacked(
-             '{ name: "NFTPunks #',
-             tokenId,
-             '" , "description": "NFT Punks are randomized Avataaars stored on chain to teach DApp development", "image": "',
-             image,
-             '"}'
+                '{ name: "NFTPunks #',
+                tokenId,
+                '" , "description": "NFT Punks are randomized Avataaars stored on chain", "image": "',
+                imageByDNA(tokenDNA[tokenId]),
+                '"}'
             )
         );
-        return string(abi.encodePacked("data:application/json;base64,", jsonURI ));
-    } 
+        return string(abi.encodePacked("data:application/json;base64,", json));
+    }
 }
